@@ -25,14 +25,10 @@ public class Main {
 			statement.execute("CREATE TABLE IF NOT EXISTS " + TABLE_CONTACTS + "(" + COLUMN_NAME + " TEXT, "
 					+ COLUMN_PHONE + " INTEGER, " + COLUMN_EMAIL + " TEXT)");
 
-			statement.execute("INSERT INTO " + TABLE_CONTACTS + " (" + COLUMN_NAME + ", " + COLUMN_PHONE + ", "
-					+ COLUMN_EMAIL + ") " + "VALUES ('Tim', 654321876, 'tim@email.com')");
-			statement.execute("INSERT INTO " + TABLE_CONTACTS + " (" + COLUMN_NAME + ", " + COLUMN_PHONE + ", "
-					+ COLUMN_EMAIL + ") " + "VALUES ('Chris', 123456789, 'chris@email.com')");
-			statement.execute("INSERT INTO " + TABLE_CONTACTS + " (" + COLUMN_NAME + ", " + COLUMN_PHONE + ", "
-					+ COLUMN_EMAIL + ") " + "VALUES ('Yvonne', 564738291, 'yc@email.com')");
-			statement.execute("INSERT INTO " + TABLE_CONTACTS + " (" + COLUMN_NAME + ", " + COLUMN_PHONE + ", "
-					+ COLUMN_EMAIL + ") " + "VALUES ('Fido', 12334, 'dog@email.com')");
+			insertContact(statement, "Tim", 654321876, "tim@email.com");
+			insertContact(statement, "Chris", 123456789, "chris@email.com");
+			insertContact(statement, "Yvonne", 564738291, "yc@email.com");
+			insertContact(statement, "Fido", 12334, "dog@email.com");
 
 			statement.execute("UPDATE " + TABLE_CONTACTS + " SET " + COLUMN_PHONE + " = 11223344 WHERE " + COLUMN_NAME
 					+ " = 'Chris'");
@@ -53,6 +49,11 @@ public class Main {
 		} catch (SQLException e) {
 			System.err.println("Something went wrong: " + e.getMessage());
 		}
+	}
+	
+	private static void insertContact(Statement statement, String name, int phone, String email) throws SQLException {
+		statement.execute("INSERT INTO " + TABLE_CONTACTS + " (" + COLUMN_NAME + ", " + COLUMN_PHONE + ", "
+				+ COLUMN_EMAIL + ") " + "VALUES ('" + name + "', " + phone + ", '" + email + "')");
 	}
 
 }
