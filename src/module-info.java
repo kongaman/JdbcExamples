@@ -1,9 +1,2 @@
-/**
- * 
- */
-/**
- * @author kranz
- *
- */
 module JdbcExamples {
 }
