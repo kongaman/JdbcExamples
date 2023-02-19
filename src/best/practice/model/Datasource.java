@@ -2,7 +2,12 @@ package best.practice.model;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.List;
 
 public class Datasource {
 
@@ -42,6 +47,44 @@ public class Datasource {
 			}
 		} catch (SQLException e) {
 			System.err.println("Couldn't close connection " + e.getMessage());
+		}
+	}
+	
+	public List<Artist> queryArtists() {
+		Statement statement = null;
+		ResultSet results = null;
+		
+		try {
+			statement = conn.createStatement();
+			results = statement.executeQuery("SELECT * FROM " + TABLE_ARTISTS);
+			List<Artist> artists = new ArrayList<>();
+			while(results.next()) {
+				Artist artist = new Artist();
+				artist.setId(results.getInt(COLUMN_ARTIST_ID));
+				artist.setName(results.getString(COLUMN_ARTIST_NAME));
+				artists.add(artist);
+			}
+			
+			return artists;
+			
+		} catch (SQLException e) {
+			System.err.println("Query failed: " + e.getMessage());
+			return null;
+		} finally {
+			try {
+				if(results != null) {
+					results.close();
+				}
+			} catch (SQLException e) {
+				System.err.println("Error closing Resultset: " + e.getMessage());
+			}
+			try {
+				if(statement != null) {
+					statement.close();
+				}
+			} catch (SQLException e) {
+				System.err.println("Error closing Statement: " + e.getMessage());
+			}
 		}
 	}
 
