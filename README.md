@@ -13,3 +13,4 @@ Examples and best practices to connect to databases in java.
 * Getting the **columns by name** from the ResultSet is ok but using the index is faster. Best Practice is using constants.
 * **Do not return Resultsets** from methods that get data from the database, so that your later methods don't have to know about datasource details. If you change your datasource to something else you only have to change the code in the model-package. **Better to return Lists of DataModelObjects** (Artist, Album, Song in this case).
 * If you close ResulSet and Statement in the finally block, it's best practice to close them individually (each in its own try/catch-block), because if you have them both in one block if the first close() throws an error the second one will not be executed. 
+* Try with resources is generally the way to go, it's way more concise, clean and easier to read.
