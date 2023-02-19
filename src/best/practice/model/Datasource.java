@@ -3,6 +3,7 @@ package best.practice.model;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -162,6 +163,22 @@ public class Datasource {
 		} catch (SQLException e) {
 			System.err.println("Query failed: " + e.getMessage());
 			return null;
+		}
+	}
+	
+	public void querySongsMetaData() {
+		String sql = "SELECT * FROM " + TABLE_SONGS;
+		
+		try (Statement statement = conn.createStatement();
+				ResultSet results = statement.executeQuery(sql)) {
+			
+			ResultSetMetaData meta = results.getMetaData();
+			int numColumns = meta.getColumnCount();
+			for (int i = 1; i <= numColumns; i++) {
+				System.out.format("Column %d in the songs table is named %s\n", i, meta.getColumnName(i));
+			}
+		} catch (SQLException e) {
+			System.err.println("Query failed: " + e.getMessage());
 		}
 	}
 
