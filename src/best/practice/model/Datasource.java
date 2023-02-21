@@ -61,6 +61,17 @@ public class Datasource {
 	public static final String QUERY_ARTIST_FOR_SONG_SORT = " ORDER BY " + TABLE_ARTISTS + "." + COLUMN_ARTIST_NAME
 			+ ", " + TABLE_ALBUMS + "." + COLUMN_ALBUM_NAME + " COLLATE NOCASE ";
 
+	public static final String TABLE_ARTIST_SONG_VIEW = "artist_list";
+
+	public static final String CREATE_ARTIST_FOR_SONG_VIEW = "CREATE VIEW IF NOT EXISTS " + TABLE_ARTIST_SONG_VIEW
+			+ " AS SELECT " + TABLE_ARTISTS + "." + COLUMN_ARTIST_NAME + ", " + TABLE_ALBUMS + "." + COLUMN_ALBUM_NAME
+			+ " AS " + COLUMN_SONG_ALBUM + ", " + TABLE_SONGS + "." + COLUMN_SONG_TRACK + ", " + TABLE_SONGS + "."
+			+ COLUMN_SONG_TITLE + " FROM " + TABLE_SONGS + " INNER JOIN " + TABLE_ALBUMS + " ON " + TABLE_SONGS + "."
+			+ COLUMN_SONG_ALBUM + " = " + TABLE_ALBUMS + "." + COLUMN_ALBUM_ID + " INNER JOIN " + TABLE_ARTISTS + " ON "
+			+ TABLE_ALBUMS + "." + COLUMN_ALBUM_ARTIST + " = " + TABLE_ARTISTS + "." + COLUMN_ARTIST_ID + " ORDER BY "
+			+ TABLE_ARTISTS + "." + COLUMN_ARTIST_NAME + ", " + TABLE_ALBUMS + "." + COLUMN_ALBUM_NAME + ", "
+			+ TABLE_SONGS + "." + COLUMN_SONG_TRACK;
+
 	private Connection conn;
 
 	public boolean open() {
@@ -91,7 +102,8 @@ public class Datasource {
 			sb.append((sortOrder == ORDER_BY_DESC) ? "DESC" : "ASC");
 		}
 
-		try (Statement statement = conn.createStatement(); ResultSet results = statement.executeQuery(sb.toString())) {
+		try (Statement statement = conn.createStatement();
+				ResultSet results = statement.executeQuery(sb.toString())) {
 
 			List<Artist> artists = new ArrayList<>();
 			while (results.next()) {
@@ -127,9 +139,7 @@ public class Datasource {
 			while (results.next()) {
 				albums.add(results.getString(1));
 			}
-
 			return albums;
-
 		} catch (SQLException e) {
 			System.err.println("Query failed: " + e.getMessage());
 			return null;
@@ -165,13 +175,13 @@ public class Datasource {
 			return null;
 		}
 	}
-	
+
 	public void querySongsMetaData() {
 		String sql = "SELECT * FROM " + TABLE_SONGS;
-		
+
 		try (Statement statement = conn.createStatement();
 				ResultSet results = statement.executeQuery(sql)) {
-			
+
 			ResultSetMetaData meta = results.getMetaData();
 			int numColumns = meta.getColumnCount();
 			for (int i = 1; i <= numColumns; i++) {
@@ -182,4 +192,28 @@ public class Datasource {
 		}
 	}
 
+	public int getcount(String table) {
+
+		String sql = "SELECT COUNT(*) AS count FROM " + table;
+
+		try (Statement statement = conn.createStatement(); 
+				ResultSet results = statement.executeQuery(sql)) {
+			int count = results.getInt("count");
+			return count;
+		} catch (SQLException e) {
+			System.err.println("Query failed: " + e.getMessage());
+			return -1;
+		}
+	}
+
+	public boolean createViewForSongArtists() {
+
+		try (Statement statement = conn.createStatement()) {
+			statement.execute(CREATE_ARTIST_FOR_SONG_VIEW);
+			return true;
+		} catch (SQLException e) {
+			System.out.println("Create View failed: " + e.getMessage());
+			return false;
+		}
+	}
 }
