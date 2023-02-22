@@ -1,6 +1,7 @@
 package best.practice;
 
 import java.util.List;
+import java.util.Scanner;
 
 import best.practice.model.Artist;
 import best.practice.model.Datasource;
@@ -50,7 +51,11 @@ public class MainMusic {
 		
 		datasource.createViewForSongArtists();
 		
-		songArtists = datasource.queryArtistForSong("Go Your Own Way", Datasource.ORDER_BY_DESC);
+		Scanner scanner = new Scanner(System.in);
+		System.out.println("Enter a song title: ");
+		String title = scanner.nextLine();
+		
+		songArtists = datasource.queryArtistForSong(title, Datasource.ORDER_BY_DESC);
 		if (songArtists == null) {
 			System.out.println("Error!");
 			return;

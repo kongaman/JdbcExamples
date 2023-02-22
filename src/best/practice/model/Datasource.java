@@ -2,6 +2,7 @@ package best.practice.model;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -71,15 +72,20 @@ public class Datasource {
 			+ TABLE_ALBUMS + "." + COLUMN_ALBUM_ARTIST + " = " + TABLE_ARTISTS + "." + COLUMN_ARTIST_ID + " ORDER BY "
 			+ TABLE_ARTISTS + "." + COLUMN_ARTIST_NAME + ", " + TABLE_ALBUMS + "." + COLUMN_ALBUM_NAME + ", "
 			+ TABLE_SONGS + "." + COLUMN_SONG_TRACK;
-	
-	public static final String QUERY_VIEW_SONG_INFO_START = "SELECT " + COLUMN_ARTIST_NAME + ", "+ COLUMN_SONG_ALBUM + ", " 
-			+ COLUMN_SONG_TRACK + " FROM " + TABLE_ARTIST_SONG_VIEW + " WHERE " + COLUMN_SONG_TITLE + " = \"";
+
+	public static final String QUERY_VIEW_SONG_INFO_START = "SELECT " + COLUMN_ARTIST_NAME + ", " + COLUMN_SONG_ALBUM
+			+ ", " + COLUMN_SONG_TRACK + " FROM " + TABLE_ARTIST_SONG_VIEW + " WHERE " + COLUMN_SONG_TITLE + " = \"";
+
+	public static final String QUERY_VIEW_SONG_INFO_PREP = "SELECT " + COLUMN_ARTIST_NAME + ", " + COLUMN_SONG_ALBUM
+			+ ", " + COLUMN_SONG_TRACK + " FROM " + TABLE_ARTIST_SONG_VIEW + " WHERE " + COLUMN_SONG_TITLE + " = ?";
 
 	private Connection conn;
+	private PreparedStatement querySongInfoView;
 
 	public boolean open() {
 		try {
 			conn = DriverManager.getConnection(CONNECTION_STRING);
+			querySongInfoView = conn.prepareStatement(QUERY_VIEW_SONG_INFO_PREP);
 			return true;
 		} catch (SQLException e) {
 			System.err.println("Couldn't connect to database. " + e.getMessage());
@@ -89,6 +95,9 @@ public class Datasource {
 
 	public void close() {
 		try {
+			if (querySongInfoView != null) {
+				querySongInfoView.close();
+			}
 			if (conn != null) {
 				conn.close();
 			}
@@ -105,8 +114,7 @@ public class Datasource {
 			sb.append((sortOrder == ORDER_BY_DESC) ? "DESC" : "ASC");
 		}
 
-		try (Statement statement = conn.createStatement();
-				ResultSet results = statement.executeQuery(sb.toString())) {
+		try (Statement statement = conn.createStatement(); ResultSet results = statement.executeQuery(sb.toString())) {
 
 			List<Artist> artists = new ArrayList<>();
 			while (results.next()) {
@@ -135,8 +143,7 @@ public class Datasource {
 
 		System.out.println("SQL statement: " + sb.toString());
 
-		try (Statement statement = conn.createStatement();
-				ResultSet results = statement.executeQuery(sb.toString())) {
+		try (Statement statement = conn.createStatement(); ResultSet results = statement.executeQuery(sb.toString())) {
 
 			List<String> albums = new ArrayList<>();
 			while (results.next()) {
@@ -159,8 +166,7 @@ public class Datasource {
 
 		System.out.println("SQL statement: " + sb.toString());
 
-		try (Statement statement = conn.createStatement();
-				ResultSet results = statement.executeQuery(sb.toString())) {
+		try (Statement statement = conn.createStatement(); ResultSet results = statement.executeQuery(sb.toString())) {
 
 			List<SongArtist> songArtists = new ArrayList<>();
 			while (results.next()) {
@@ -182,8 +188,7 @@ public class Datasource {
 	public void querySongsMetaData() {
 		String sql = "SELECT * FROM " + TABLE_SONGS;
 
-		try (Statement statement = conn.createStatement();
-				ResultSet results = statement.executeQuery(sql)) {
+		try (Statement statement = conn.createStatement(); ResultSet results = statement.executeQuery(sql)) {
 
 			ResultSetMetaData meta = results.getMetaData();
 			int numColumns = meta.getColumnCount();
@@ -199,8 +204,7 @@ public class Datasource {
 
 		String sql = "SELECT COUNT(*) AS count FROM " + table;
 
-		try (Statement statement = conn.createStatement(); 
-				ResultSet results = statement.executeQuery(sql)) {
+		try (Statement statement = conn.createStatement(); ResultSet results = statement.executeQuery(sql)) {
 			int count = results.getInt("count");
 			return count;
 		} catch (SQLException e) {
@@ -219,18 +223,15 @@ public class Datasource {
 			return false;
 		}
 	}
-	
+
 	public List<SongArtist> querySongViewInfo(String title) {
-		StringBuilder sb = new StringBuilder(QUERY_VIEW_SONG_INFO_START);
-		sb.append(title).append("\"");
-		System.out.println("SQL statement: " + sb.toString());
-		
-		List<SongArtist> songArtists = new ArrayList<>();
-		
-		try (Statement statement = conn.createStatement(); 
-				ResultSet results = statement.executeQuery(sb.toString())) {
-			
-			while(results.next()) {
+		try {
+			querySongInfoView.setString(1, title);
+			ResultSet results = querySongInfoView.executeQuery();
+				
+			List<SongArtist> songArtists = new ArrayList<>();
+
+			while (results.next()) {
 				SongArtist songArtist = new SongArtist();
 				songArtist.setArtistName(results.getString(1));
 				songArtist.setAlbumName(results.getString(2));
