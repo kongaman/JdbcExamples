@@ -71,6 +71,9 @@ public class Datasource {
 			+ TABLE_ALBUMS + "." + COLUMN_ALBUM_ARTIST + " = " + TABLE_ARTISTS + "." + COLUMN_ARTIST_ID + " ORDER BY "
 			+ TABLE_ARTISTS + "." + COLUMN_ARTIST_NAME + ", " + TABLE_ALBUMS + "." + COLUMN_ALBUM_NAME + ", "
 			+ TABLE_SONGS + "." + COLUMN_SONG_TRACK;
+	
+	public static final String QUERY_VIEW_SONG_INFO_START = "SELECT " + COLUMN_ARTIST_NAME + ", "+ COLUMN_SONG_ALBUM + ", " 
+			+ COLUMN_SONG_TRACK + " FROM " + TABLE_ARTIST_SONG_VIEW + " WHERE " + COLUMN_SONG_TITLE + " = \"";
 
 	private Connection conn;
 
@@ -214,6 +217,31 @@ public class Datasource {
 		} catch (SQLException e) {
 			System.out.println("Create View failed: " + e.getMessage());
 			return false;
+		}
+	}
+	
+	public List<SongArtist> querySongViewInfo(String title) {
+		StringBuilder sb = new StringBuilder(QUERY_VIEW_SONG_INFO_START);
+		sb.append(title).append("\"");
+		System.out.println("SQL statement: " + sb.toString());
+		
+		List<SongArtist> songArtists = new ArrayList<>();
+		
+		try (Statement statement = conn.createStatement(); 
+				ResultSet results = statement.executeQuery(sb.toString())) {
+			
+			while(results.next()) {
+				SongArtist songArtist = new SongArtist();
+				songArtist.setArtistName(results.getString(1));
+				songArtist.setAlbumName(results.getString(2));
+				songArtist.setTrack(results.getInt(3));
+				songArtists.add(songArtist);
+			}
+			return songArtists;
+			
+		} catch (SQLException e) {
+			System.err.println("Query failed: " + e.getMessage());
+			return null;
 		}
 	}
 }

@@ -50,6 +50,18 @@ public class MainMusic {
 		
 		datasource.createViewForSongArtists();
 		
+		songArtists = datasource.queryArtistForSong("Go Your Own Way", Datasource.ORDER_BY_DESC);
+		if (songArtists == null) {
+			System.out.println("Error!");
+			return;
+		} else if (songArtists.isEmpty()) {
+			System.out.println("Couldn't find the srtist for the song.");
+			return;
+		}
+		for (SongArtist songArtist : songArtists) {
+			System.out.println(songArtist.getArtistName() + ", " + songArtist.getAlbumName() + ", Track: " + songArtist.getTrack());
+		}
+		
 		datasource.close();
 
 	}
