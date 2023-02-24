@@ -51,21 +51,23 @@ public class MainMusic {
 		
 		datasource.createViewForSongArtists();
 		
-		Scanner scanner = new Scanner(System.in);
-		System.out.println("Enter a song title: ");
-		String title = scanner.nextLine();
+//		Scanner scanner = new Scanner(System.in);
+//		System.out.println("Enter a song title: ");
+//		String title = scanner.nextLine();
+//		
+//		songArtists = datasource.queryArtistForSong(title, Datasource.ORDER_BY_DESC);
+//		if (songArtists == null) {
+//			System.out.println("Error!");
+//			return;
+//		} else if (songArtists.isEmpty()) {
+//			System.out.println("Couldn't find the srtist for the song.");
+//			return;
+//		}
+//		for (SongArtist songArtist : songArtists) {
+//			System.out.println(songArtist.getArtistName() + ", " + songArtist.getAlbumName() + ", Track: " + songArtist.getTrack());
+//		}
 		
-		songArtists = datasource.queryArtistForSong(title, Datasource.ORDER_BY_DESC);
-		if (songArtists == null) {
-			System.out.println("Error!");
-			return;
-		} else if (songArtists.isEmpty()) {
-			System.out.println("Couldn't find the srtist for the song.");
-			return;
-		}
-		for (SongArtist songArtist : songArtists) {
-			System.out.println(songArtist.getArtistName() + ", " + songArtist.getAlbumName() + ", Track: " + songArtist.getTrack());
-		}
+		datasource.insertSong("Like A Rolling Stone", "Bob Dylan", "Bob Dylan's Greatest Hits", 5);
 		
 		datasource.close();
 
